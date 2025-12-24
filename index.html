@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة المتاهة الذكية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 800px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
+        }
+        
+        h1 {
+            color: #4285f4;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(66, 133, 244, 0.5);
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            background-color: #111;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            border: 1px solid #333;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        
+        .stat {
+            text-align: center;
+            flex: 1;
+            padding: 10px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4285f4;
+        }
+        
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            margin-bottom: 20px;
+            background-color: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #333;
+        }
+        
+        #mazeCanvas {
+            display: block;
+            background-color: #000;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+        
+        .btn-primary {
+            background-color: #4285f4;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.4);
+        }
+        
+        .btn-secondary {
+            background-color: #333;
+            color: #f0f0f0;
+            border: 1px solid #555;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #444;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: #34a853;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #2e8b47;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 168, 83, 0.4);
+        }
+        
+        .instructions {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid #333;
+        }
+        
+        .instructions h3 {
+            color: #f4b400;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .instructions-list {
+            list-style-type: none;
+            padding-right: 10px;
+        }
+        
+        .instructions-list li {
+            margin-bottom: 10px;
+            padding-right: 10px;
+            position: relative;
+        }
+        
+        .instructions-list li:before {
+            content: "•";
+            color: #4285f4;
+            font-size: 1.5rem;
+            position: absolute;
+            right: -15px;
+            top: -5px;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .player-color {
+            background-color: #4285f4;
+        }
+        
+        .ai-color {
+            background-color: #ea4335;
+        }
+        
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            text-align: center;
+            z-index: 10;
+            border: 2px solid #4285f4;
+            box-shadow: 0 0 30px rgba(66, 133, 244, 0.5);
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            .canvas-container {
+                height: 400px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>لعبة المتاهة الذكية</h1>
+        <div class="subtitle">استكشف المتاهة أولاً ثم شاهد الذكاء الاصطناعي يجد أفضل مسار</div>
+    </div>
+    
+    <div class="game-container">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="playerMoves">0</div>
+                <div class="stat-label">حركات اللاعب</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="aiMoves">0</div>
+                <div class="stat-label">حركات الذكاء الاصطناعي</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="mazeNumber">1</div>
+                <div class="stat-label">رقم المتاهة</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="time">0</div>
+                <div class="stat-label">ثانية</div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="mazeCanvas"></canvas>
+            <div class="message" id="message"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" id="newMazeBtn">متاهة جديدة</button>
+            <button class="btn btn-success" id="solveBtn">حل بالذكاء الاصطناعي</button>
+            <button class="btn btn-secondary" id="resetBtn">إعادة تعيين</button>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="color-box player-color"></div>
+                <span>مسار اللاعب</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box ai-color"></div>
+                <span>مسار الذكاء الاصطناعي</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>كيفية اللعب</h3>
+        <ul class="instructions-list">
+            <li>استخدم مفاتيح الأسهم على لوحة المفاتيح أو السحب بالماوس للتحرك في المتاهة</li>
+            <li>ابدأ من الزاوية العلوية اليسرى وحاول الوصول إلى الزاوية السفلية اليمنى</li>
+            <li>بعد استكشاف المتاهة، اضغط على زر "حل بالذكاء الاصطناعي" لمشاهدة أفضل مسار</li>
+            <li>يمكنك إنشاء متاهة جديدة في أي وقت باستخدام زر "متاهة جديدة"</li>
+            <li>يتم توليد متاهة فريدة مختلفة في كل مرة (أكثر من 100 متاهة مختلفة)</li>
+        </ul>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mazeCanvas');
+        const ctx = canvas.getContext('2d');
+        const playerMovesElement = document.getElementById('playerMoves');
+        const aiMovesElement = document.getElementById('aiMoves');
+        const mazeNumberElement = document.getElementById('mazeNumber');
+        const timeElement = document.getElementById('time');
+        const newMazeBtn = document.getElementById('newMazeBtn');
+        const solveBtn = document.getElementById('solveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const messageElement = document.getElementById('message');
+        
+        let maze = [];
+        let playerPath = [];
+        let aiPath = [];
+        let playerPosition = {x: 0, y: 0};
+        let startPosition = {x: 0, y: 0};
+        let endPosition = {x: 0, y: 0};
+        let playerMoves = 0;
+        let aiMoves = 0;
+        let mazeNumber = 1;
+        let gameTime = 0;
+        let timerInterval;
+        let mazeSize = 21;
+        let cellSize = 0;
+        let mazeSolved = false;
+        let gameActive = true;
+        
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            cellSize = Math.min(canvas.width, canvas.height) / mazeSize;
+            drawMaze();
+        }
+        
+        function generateMaze() {
+            maze = [];
+            for (let y = 0; y < mazeSize; y++) {
+                maze[y] = [];
+                for (let x = 0; x < mazeSize; x++) {
+                    maze[y][x] = {
+                        top: true,
+                        right: true,
+                        bottom: true,
+                        left: true,
+                        visited: false
+                    };
+                }
+            }
+            
+            const stack = [];
+            const startY = Math.floor(Math.random() * mazeSize);
+            const startX = Math.floor(Math.random() * mazeSize);
+            
+            let current = maze[startY][startX];
+            current.visited = true;
+            stack.push({y: startY, x: startX});
+            
+            while (stack.length > 0) {
+                const {y, x} = stack[stack.length - 1];
+                const neighbors = [];
+                
+                if (y > 0 && !maze[y-1][x].visited) neighbors.push({y: y-1, x, wall: 'top', opposite: 'bottom'});
+                if (x < mazeSize-1 && !maze[y][x+1].visited) neighbors.push({y, x: x+1, wall: 'right', opposite: 'left'});
+                if (y < mazeSize-1 && !maze[y+1][x].visited) neighbors.push({y: y+1, x, wall: 'bottom', opposite: 'top'});
+                if (x > 0 && !maze[y][x-1].visited) neighbors.push({y, x: x-1, wall: 'left', opposite: 'right'});
+                
+                if (neighbors.length > 0) {
+                    const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    
+                    maze[y][x][randomNeighbor.wall] = false;
+                    maze[randomNeighbor.y][randomNeighbor.x][randomNeighbor.opposite] = false;
+                    
+                    maze[randomNeighbor.y][randomNeighbor.x].visited = true;
+                    stack.push({y: randomNeighbor.y, x: randomNeighbor.x});
+                } else {
+                    stack.pop();
+                }
+            }
+            
+            startPosition = {x: 0, y: 0};
+            endPosition = {x: mazeSize-1, y: mazeSize-1};
+            
+            maze[0][0].left = false;
+            maze[mazeSize-1][mazeSize-1].right = false;
+            
+            for (let y = 0; y < mazeSize; y++) {
+                for (let x = 0; x < mazeSize; x++) {
+                    maze[y][x].visited = false;
+                }
+            }
+            
+            playerPosition = {x: startPosition.x, y: startPosition.y};
+            playerPath = [{x: playerPosition.x, y: playerPosition.y}];
+            aiPath = [];
+            playerMoves = 0;
+            aiMoves = 0;
+            mazeSolved = false;
+            gameActive = true;
+            
+            updateStats();
+            drawMaze();
+            
+            mazeNumber++;
+            mazeNumberElement.textContent = mazeNumber;
+            
+            clearInterval(timerInterval);
+            gameTime = 0;
+            timeElement.textContent = gameTime;
+            timerInterval = setInterval(() => {
+                gameTime++;
+                timeElement.textContent = gameTime;
+            }, 1000);
+            
+            showMessage("متاهة جديدة! ابدأ من الزاوية العلوية اليسرى");
+        }
+        
+        function drawMaze() {
+            if (!canvas.width || !canvas.height) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const offsetX = (canvas.width - mazeSize * cellSize) / 2;
+            const offsetY = (canvas.height - mazeSize * cellSize) / 2;
+            
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            
+            for (let y = 0; y < mazeSize; y++) {
+                for (let x = 0; x < mazeSize; x++) {
+                    const cell = maze[y][x];
+                    const cellX = offsetX + x * cellSize;
+                    const cellY = offsetY + y * cellSize;
+                    
+                    if (cell.top) {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX, cellY);
+                        ctx.lineTo(cellX + cellSize, cellY);
+                        ctx.stroke();
+                    }
+                    
+                    if (cell.right) {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX + cellSize, cellY);
+                        ctx.lineTo(cellX + cellSize, cellY + cellSize);
+                        ctx.stroke();
+                    }
+                    
+                    if (cell.bottom) {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX, cellY + cellSize);
+                        ctx.lineTo(cellX + cellSize, cellY + cellSize);
+                        ctx.stroke();
+                    }
+                    
+                    if (cell.left) {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX, cellY);
+                        ctx.lineTo(cellX, cellY + cellSize);
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            ctx.fillStyle = '#0a0';
+            ctx.beginPath();
+            ctx.arc(
+                offsetX + startPosition.x * cellSize + cellSize/2,
+                offsetY + startPosition.y * cellSize + cellSize/2,
+                cellSize/4,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            ctx.fillStyle = '#a00';
+            ctx.beginPath();
+            ctx.arc(
+                offsetX + endPosition.x * cellSize + cellSize/2,
+                offsetY + endPosition.y * cellSize + cellSize/2,
+                cellSize/4,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            if (playerPath.length > 1) {
+                ctx.strokeStyle = '#4285f4';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                
+                const firstPoint = playerPath[0];
+                ctx.moveTo(
+                    offsetX + firstPoint.x * cellSize + cellSize/2,
+                    offsetY + firstPoint.y * cellSize + cellSize/2
+                );
+                
+                for (let i = 1; i < playerPath.length; i++) {
+                    const point = playerPath[i];
+                    ctx.lineTo(
+                        offsetX + point.x * cellSize + cellSize/2,
+                        offsetY + point.y * cellSize + cellSize/2
+                    );
+                }
+                
+                ctx.stroke();
+            }
+            
+            if (aiPath.length > 1) {
+                ctx.strokeStyle = '#ea4335';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                
+                const firstPoint = aiPath[0];
+                ctx.moveTo(
+                    offsetX + firstPoint.x * cellSize + cellSize/2,
+                    offsetY + firstPoint.y * cellSize + cellSize/2
+                );
+                
+                for (let i = 1; i < aiPath.length; i++) {
+                    const point = aiPath[i];
+                    ctx.lineTo(
+                        offsetX + point.x * cellSize + cellSize/2,
+                        offsetY + point.y * cellSize + cellSize/2
+                    );
+                }
+                
+                ctx.stroke();
+            }
+            
+            ctx.fillStyle = '#4285f4';
+            ctx.beginPath();
+            ctx.arc(
+                offsetX + playerPosition.x * cellSize + cellSize/2,
+                offsetY + playerPosition.y * cellSize + cellSize/2,
+                cellSize/3,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(
+                offsetX + playerPosition.x * cellSize + cellSize/2,
+                offsetY + playerPosition.y * cellSize + cellSize/2,
+                cellSize/3,
+                0,
+                Math.PI * 2
+            );
+            ctx.stroke();
+        }
+        
+        function movePlayer(dx, dy) {
+            if (!gameActive || mazeSolved) return;
+            
+            const newX = playerPosition.x + dx;
+            const newY = playerPosition.y + dy;
+            
+            if (newX < 0 || newX >= mazeSize || newY < 0 || newY >= mazeSize) return;
+            
+            const cell = maze[playerPosition.y][playerPosition.x];
+            
+            if (dx === -1 && !cell.left && newX >= 0) {
+                playerPosition.x = newX;
+                playerMoves++;
+            } else if (dx === 1 && !cell.right && newX < mazeSize) {
+                playerPosition.x = newX;
+                playerMoves++;
+            } else if (dy === -1 && !cell.top && newY >= 0) {
+                playerPosition.y = newY;
+                playerMoves++;
+            } else if (dy === 1 && !cell.bottom && newY < mazeSize) {
+                playerPosition.y = newY;
+                playerMoves++;
+            } else {
+                return;
+            }
+            
+            playerPath.push({x: playerPosition.x, y: playerPosition.y});
+            
+            if (playerPosition.x === endPosition.x && playerPosition.y === endPosition.y) {
+                gameActive = false;
+                showMessage("مبروك! وصلت إلى الهدف!");
+            }
+            
+            updateStats();
+            drawMaze();
+        }
+        
+        function solveMaze() {
+            if (!gameActive || mazeSolved) return;
+            
+            const openSet = [];
+            const closedSet = [];
+            const startNode = {
+                x: startPosition.x,
+                y: startPosition.y,
+                g: 0,
+                h: heuristic(startPosition, endPosition),
+                parent: null
+            };
+            startNode.f = startNode.g + startNode.h;
+            
+            openSet.push(startNode);
+            
+            function heuristic(a, b) {
+                return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+            }
+            
+            function findPath() {
+                if (openSet.length === 0) {
+                    showMessage("لا يوجد حل للمتاهة!");
+                    return;
+                }
+                
+                let currentNode = openSet[0];
+                let currentIndex = 0;
+                
+                for (let i = 1; i < openSet.length; i++) {
+                    if (openSet[i].f < currentNode.f) {
+                        currentNode = openSet[i];
+                        currentIndex = i;
+                    }
+                }
+                
+                openSet.splice(currentIndex, 1);
+                closedSet.push(currentNode);
+                
+                if (currentNode.x === endPosition.x && currentNode.y === endPosition.y) {
+                    const path = [];
+                    let temp = currentNode;
+                    while (temp) {
+                        path.push({x: temp.x, y: temp.y});
+                        temp = temp.parent;
+                    }
+                    aiPath = path.reverse();
+                    aiMoves = aiPath.length - 1;
+                    mazeSolved = true;
+                    gameActive = false;
+                    updateStats();
+                    drawMaze();
+                    showMessage("الذكاء الاصطناعي وجد الحل!");
+                    return;
+                }
+                
+                const neighbors = [];
+                const cell = maze[currentNode.y][currentNode.x];
+                
+                if (!cell.top && currentNode.y > 0) {
+                    neighbors.push({x: currentNode.x, y: currentNode.y - 1});
+                }
+                if (!cell.right && currentNode.x < mazeSize - 1) {
+                    neighbors.push({x: currentNode.x + 1, y: currentNode.y});
+                }
+                if (!cell.bottom && currentNode.y < mazeSize - 1) {
+                    neighbors.push({x: currentNode.x, y: currentNode.y + 1});
+                }
+                if (!cell.left && currentNode.x > 0) {
+                    neighbors.push({x: currentNode.x - 1, y: currentNode.y});
+                }
+                
+                for (const neighbor of neighbors) {
+                    if (closedSet.some(node => node.x === neighbor.x && node.y === neighbor.y)) {
+                        continue;
+                    }
+                    
+                    const gScore = currentNode.g + 1;
+                    
+                    let neighborNode = openSet.find(node => node.x === neighbor.x && node.y === neighbor.y);
+                    
+                    if (!neighborNode) {
+                        neighborNode = {
+                            x: neighbor.x,
+                            y: neighbor.y,
+                            g: gScore,
+                            h: heuristic(neighbor, endPosition),
+                            parent: currentNode
+                        };
+                        neighborNode.f = neighborNode.g + neighborNode.h;
+                        openSet.push(neighborNode);
+                    } else if (gScore < neighborNode.g) {
+                        neighborNode.g = gScore;
+                        neighborNode.f = neighborNode.g + neighborNode.h;
+                        neighborNode.parent = currentNode;
+                    }
+                }
+                
+                if (openSet.length > 0) {
+                    setTimeout(findPath, 10);
+                }
+            }
+            
+            findPath();
+        }
+        
+        function resetGame() {
+            playerPosition = {x: startPosition.x, y: startPosition.y};
+            playerPath = [{x: playerPosition.x, y: playerPosition.y}];
+            aiPath = [];
+            playerMoves = 0;
+            aiMoves = 0;
+            mazeSolved = false;
+            gameActive = true;
+            
+            clearInterval(timerInterval);
+            gameTime = 0;
+            timeElement.textContent = gameTime;
+            timerInterval = setInterval(() => {
+                gameTime++;
+                timeElement.textContent = gameTime;
+            }, 1000);
+            
+            updateStats();
+            drawMaze();
+            showMessage("تم إعادة تعيين اللعبة!");
+        }
+        
+        function updateStats() {
+            playerMovesElement.textContent = playerMoves;
+            aiMovesElement.textContent = aiMoves;
+        }
+        
+        function showMessage(text) {
+            messageElement.textContent = text;
+            messageElement.style.display = 'block';
+            
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 3000);
+        }
+        
+        function handleKeyDown(e) {
+            switch(e.key) {
+                case 'ArrowUp':
+                    movePlayer(0, -1);
+                    break;
+                case 'ArrowRight':
+                    movePlayer(1, 0);
+                    break;
+                case 'ArrowDown':
+                    movePlayer(0, 1);
+                    break;
+                case 'ArrowLeft':
+                    movePlayer(-1, 0);
+                    break;
+            }
+        }
+        
+        canvas.addEventListener('click', (e) => {
+            if (!gameActive || mazeSolved) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const offsetX = (canvas.width - mazeSize * cellSize) / 2;
+            const offsetY = (canvas.height - mazeSize * cellSize) / 2;
+            
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const cellX = Math.floor((x - offsetX) / cellSize);
+            const cellY = Math.floor((y - offsetY) / cellSize);
+            
+            if (cellX >= 0 && cellX < mazeSize && cellY >= 0 && cellY < mazeSize) {
+                const dx = cellX - playerPosition.x;
+                const dy = cellY - playerPosition.y;
+                
+                if (Math.abs(dx) + Math.abs(dy) === 1) {
+                    movePlayer(dx, dy);
+                }
+            }
+        });
+        
+        let touchStartX = 0;
+        let touchStartY = 0;
+        
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            e.preventDefault();
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        });
+        
+        canvas.addEventListener('touchend', (e) => {
+            if (!gameActive || mazeSolved) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 30) movePlayer(1, 0);
+                else if (dx < -30) movePlayer(-1, 0);
+            } else {
+                if (dy > 30) movePlayer(0, 1);
+                else if (dy < -30) movePlayer(0, -1);
+            }
+            
+            e.preventDefault();
+        });
+        
+        newMazeBtn.addEventListener('click', generateMaze);
+        solveBtn.addEventListener('click', solveMaze);
+        resetBtn.addEventListener('click', resetGame);
+        document.addEventListener('keydown', handleKeyDown);
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        generateMaze();
+        resizeCanvas();
+        
+        showMessage("مرحبًا في لعبة المتاهة الذكية! استخدم الأسهم للتحرك");
+    </script>
+</body>
+</html>
